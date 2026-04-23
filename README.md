@@ -1,10 +1,6 @@
-# mini-rag
+# RAG
 
 This is a minimal implementation of the RAG model for question answering.
-
-## The Course
-
-This is an educational project where all of the codes where explained (step by step) via a set of `Arabic` youtube videos. Please check the list:
 
 | # | Title                                    | Link                                                                                                 | Codes                                              |
 |---|------------------------------------------|------------------------------------------------------------------------------------------------------|----------------------------------------------------|
