@@ -1,2 +1,2 @@
-from LLM_Enums import LLM_Enums
+from LLM_Enums import LLM_Enums, OpenAI_Enums
 from LLM_Interface import LLM_Interface
