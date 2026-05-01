@@ -34,7 +34,7 @@ class OPENAI_Provider(LLM_Interface):
 
     # I have a question for this code.
     def process_text(self, text: str) -> str:
-        return text[:self.default_input_max_tokens].strip()
+        return text[0:self.default_input_max_tokens].strip()
     def generate_text(self, prompt: str, max_out_tokens: int = None,
                         chat_history: list=[],
                         temperature: float = None,
@@ -78,8 +78,8 @@ class OPENAI_Provider(LLM_Interface):
             return None
         
         response = self.client.embeddings.create(
-            model = self.embedding_model_name
-            input = self.text
+            model = self.embedding_model_name,
+            input = text
         )
 
         if not response or len(response.data) == 0:
@@ -88,7 +88,7 @@ class OPENAI_Provider(LLM_Interface):
         
         return response.data[0].embedding
     
-    def construct_prompt(self, prompt: str, role: str) -> str:
+    def construct_prompt(self, prompt: str, role: str) -> dict:
         return {
             "role" : role,
             "content" : self.process_text(prompt)
