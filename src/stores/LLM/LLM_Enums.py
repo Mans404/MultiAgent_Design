@@ -8,3 +8,7 @@ class OpenAI_Enums(Enum):
     SYSTEM = "system"
     USER = "user"
     ASSISTANT = "assistant"
+class Cohere_Enums(Enum):
+    SYSTEM = "SYSTEM"
+    USER = "USER"
+    ASSISTANT = "CHATBOT"
