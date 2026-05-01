@@ -67,8 +67,19 @@ class Cohere_Provider(LLM_Interface):
         if not self.embedding_model_name:
             self.logger.error("Embedding model for Cohere was not set")
             return None
-    
+        input_type = Cohere_Enums.DOCUMENT.value if document_type == "document" else Cohere_Enums.QUERY.value
+        response = self.client.embed(
+            model=self.embedding_model_name,
+            texts=[self.process_text(text)],
+            truncate="END",
+            input_type=input_type,
+            embedding_types=['float']
+        )
 
+        if not response.embeddings.float:
+            self.logger.error("No embedding response from Cohere API")
+            return None
+        return response.embeddings.float[0]
     def construct_prompt(self, prompt, role):
         return {
             "role": role,
