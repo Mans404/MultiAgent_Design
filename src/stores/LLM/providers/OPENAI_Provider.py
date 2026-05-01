@@ -35,7 +35,10 @@ class OPENAI_Provider(LLM_Interface):
     # I have a question for this code.
     def process_text(self, text: str) -> str:
         return text[:self.default_input_max_tokens].strip()
-    def generate_text(self, prompt: str, max_out_tokens: int = None, chat_history: list=[] temperature: float = None) -> str:
+    def generate_text(self, prompt: str, max_out_tokens: int = None,
+                        chat_history: list=[],
+                        temperature: float = None,
+                         ) -> str:
         #if it is embedding model.
         if not self.client:
             self.logger.error("OpenAI client was not set")
