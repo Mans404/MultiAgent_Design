@@ -30,8 +30,7 @@ class OPENAI_Provider(LLM_Interface):
 
     def set_embedding_model(self, model_name: str, embedding_size: int):
         self.embedding_model_name = model_name
-        self.embedding_size = embedding_size 
-
+        self.embedding_size = embedding_size
     # I have a question for this code.
     def process_text(self, text: str) -> str:
         return text[0:self.default_input_max_tokens].strip()

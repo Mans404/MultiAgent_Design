@@ -46,11 +46,29 @@ class Cohere_Provider(LLM_Interface):
             self.logger.error("Generation model for Cohere was not set")
             return None
         
+        max_out_tokens = max_out_tokens if max_out_tokens else self.default_output_max_tokens
+        temperature = temperature if temperature else self.default_temperature
+        
         response = self.client.chat(
             model = self.generation_model_name,
             chat_history=chat_history,
             message=self.process_text(prompt),)
-        return response.choices[0].message.content.strip()  ### Focus on this line. I have a question about it.
+        
+        if not response or not response.text:
+            self.logger.error("No response from Cohere API")
+            return None
+        return response.text
+    
+    def embed_text(self, text, document_type = None):
+        if not self.client:
+            self.logger.error("Cohere client was not set")
+            return None
+        
+        if not self.embedding_model_name:
+            self.logger.error("Embedding model for Cohere was not set")
+            return None
+    
+
     def construct_prompt(self, prompt, role):
         return {
             "role": role,
