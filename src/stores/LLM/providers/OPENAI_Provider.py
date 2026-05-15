@@ -1,5 +1,5 @@
-from LLM_Interface import LLM_Interface
-from LLM_Enums import LLM_Enums, OpenAI_Enums
+from ..LLM_Interface import LLM_Interface
+from ..LLM_Enums import LLM_Enums, OpenAI_Enums
 from openai import OpenAI
 import logging
 class OPENAI_Provider(LLM_Interface):
@@ -8,7 +8,7 @@ class OPENAI_Provider(LLM_Interface):
                     api_url : str = None,
                     default_input_max_tokens: int = 1000,
                     default_output_max_tokens: int = 200,
-                    default_temperature: float = 0.7,):
+                    default_temperature: float = 0.7,model_name: str = None):
         
         self.api_key = api_key
         self.api_url = api_url

@@ -1,4 +1,4 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, field_validator
 from typing import Optional
 
 class PushRequest(BaseModel):
@@ -6,3 +6,5 @@ class PushRequest(BaseModel):
     chunk_size: Optional[int] = 100
     overlap_size: Optional[int] = 20
     do_reset: Optional[int] = 0
+
+    

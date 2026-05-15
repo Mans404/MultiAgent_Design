@@ -1,6 +1,6 @@
-from LLM_Enums import LLM_Enums
-from providers.OPENAI_Provider import OPENAI_Provider
-from providers.Cohere_Provider import Cohere_Provider
+from .LLM_Enums import LLM_Enums
+from .providers.OPENAI_Provider import OPENAI_Provider
+from .providers.Cohere_Provider import Cohere_Provider
 from helpers import Settings
 
 

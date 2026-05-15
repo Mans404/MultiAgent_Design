@@ -33,16 +33,14 @@ class NLPController(BaseController):
         texts = [chunk.chunk_text for chunk in chunks]
         metadata = [chunk.chunk_metadata for chunk in chunks]  
         vectors = [
-            self.embedding_client.embed_text(text = text, document_type = Document_Type.TEXT.value)
-            from text in texts
+            self.embedding_client.embed_text(text = text, document_type = Document_Type.QUERY.value)
+            for text in texts
         ]
         # step3: create collection if not exists
-        self.create_collection(
-            collection_name = collection_name,
-            dimension = self.embedding_client.embedding_size,
-            do_reset = do_reset,
-            
-            
+        self.vectordb_client.create_collection(
+            collection_name=collection_name,
+            dimension=self.embedding_client.embedding_size,
+            do_reset=do_reset
         )
         
         

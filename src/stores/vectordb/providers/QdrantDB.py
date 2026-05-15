@@ -7,7 +7,7 @@ import logging
 class QdrantDB(VectorDB_Interface):
     def __init__(self, db_path: str, distance_method: DistanceMethodEnum = DistanceMethodEnum.COSINE):
         self.db_path = db_path
-        self.distance_method = distance_method.value
+        self.distance_method = distance_method
         self.client = None
         if distance_method == DistanceMethodEnum.COSINE:
             self.distance_method = models.Distance.COSINE

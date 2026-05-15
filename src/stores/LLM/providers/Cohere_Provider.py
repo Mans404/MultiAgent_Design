@@ -1,5 +1,5 @@
-from LLM_Interface import LLM_Interface
-from LLM_Enums import LLM_Enums, Cohere_Enums
+from ..LLM_Interface import LLM_Interface
+from ..LLM_Enums import LLM_Enums, Cohere_Enums
 import cohere
 import logging
 class Cohere_Provider(LLM_Interface):
@@ -7,7 +7,8 @@ class Cohere_Provider(LLM_Interface):
                     
                     default_input_max_tokens: int = 1000,
                     default_output_max_tokens: int = 200,
-                    default_temperature: float = 0.7,):
+                    default_temperature: float = 0.7,
+                    model_name: str = None):
         
         self.api_key = api_key
         self.default_input_max_tokens = default_input_max_tokens
@@ -25,7 +26,7 @@ class Cohere_Provider(LLM_Interface):
     def set_generation_model(self, model_name: str):
         self.generation_model_name = model_name
 
-    def set_embedding_model(self, model_name: str, embedding_size: int):
+    def set_embedding_model(self, model_name: str, embedding_size: int = None):
         self.embedding_model_name = model_name
         self.embedding_size = embedding_size
 

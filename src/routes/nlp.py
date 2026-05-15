@@ -1,10 +1,10 @@
 from fastapi import FastAPI, APIRouter, status, Request
 from fastapi.responses import JSONResponse
-from routes.schemes.nlp import PushRequest
-from ..models.ProjectModel import ProjectModel
-from ..models.ChunkModel import ChunkModel
-from ..controllers.NLPController import NLPController 
-from ..models.enums.ResponseEnums import ResponseSignal
+from .schemes.nlp import PushRequest
+from models.ProjectModel import ProjectModel
+from models.ChunkModel import ChunkModel
+from controllers.NLPController import NLPController 
+from models.enums.ResponseEnums import ResponseSignal
 nlp_router = APIRouter(
     prefix="/api/v1/nlp",
     tags=["api_v1", "nlp"],

@@ -1,4 +1,6 @@
-from pydantic_settings import BaseSettings, SettingsConfigDict
+import os
+
+from pydantic_settings import BaseSettings
 
 class Settings(BaseSettings):
 
@@ -31,9 +33,11 @@ class Settings(BaseSettings):
     VECTOR_DB_PATH: str
     VECTOR_DB_DISTANCE_METHOD: str = None
 
-
+    
     class Config:
-        env_file = ".env"
+        env_file = os.path.abspath(
+            os.path.join(os.path.dirname(__file__), "..", ".env")
+        )
 
 def get_settings():
     return Settings()
