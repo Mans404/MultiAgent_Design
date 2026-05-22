@@ -3,18 +3,23 @@ from ..VectorDB_Enums import DistanceMethodEnum
 from qdrant_client import QdrantClient
 from qdrant_client import models 
 import logging
+from uuid import uuid4
+from typing import Union
 
 class QdrantDB(VectorDB_Interface):
-    def __init__(self, db_path: str, distance_method: DistanceMethodEnum = DistanceMethodEnum.COSINE):
+    def __init__(self, db_path: str, distance_method: Union[DistanceMethodEnum, str] = DistanceMethodEnum.COSINE):
         self.db_path = db_path
-        self.distance_method = distance_method
         self.client = None
-        if distance_method == DistanceMethodEnum.COSINE:
-            self.distance_method = models.Distance.COSINE
-        elif distance_method == DistanceMethodEnum.EUCLIDEAN:
-            self.distance_method = models.Distance.EUCLIDEAN
-        elif distance_method == DistanceMethodEnum.DOT_PRODUCT:
-            self.distance_method = models.Distance.DOT
+        if isinstance(distance_method, str):
+            normalized_distance_method = distance_method.strip().lower()
+            distance_method = DistanceMethodEnum(normalized_distance_method)
+
+        distance_method_map = {
+            DistanceMethodEnum.COSINE: models.Distance.COSINE,
+            DistanceMethodEnum.EUCLIDEAN: models.Distance.EUCLID,
+            DistanceMethodEnum.DOT_PRODUCT: models.Distance.DOT,
+        }
+        self.distance_method = distance_method_map[distance_method]
         self.logger = logging.getLogger(__name__)
     def connect(self):
         self.client = QdrantClient(path=self.db_path)
@@ -53,64 +58,71 @@ class QdrantDB(VectorDB_Interface):
                 return False
 
     def insert_data(self, collection_name: str, text: str, vector: list, metadata=None, record_id=None):
-            if not self.is_collection_excisted(collection_name):
-                self.logger.error(f"Collection '{collection_name}' does not exist. Please create it first.")
-                return False
+        if not self.is_collection_excisted(collection_name):
+            self.logger.error(f"Collection '{collection_name}' does not exist. Please create it first.")
+            return False
+        try:
+            if record_id is None:
+                record_id = str(uuid4())
+
+            payload = {"text": text, "metadata": metadata} if metadata else {"text": text}
+
+            self.client.upsert(
+                collection_name=collection_name,
+                points=[
+                    models.PointStruct(
+                        id=record_id,
+                        vector=vector,
+                        payload=payload
+                    )
+                ]
+            )
+        except Exception as e:
+            self.logger.error(f"Cannot insert new record {e}")
+            return False
+        self.logger.info(f"Data inserted into collection '{collection_name}' successfully.")
+        return True
+    def insert_many_data(self, collection_name: str, texts: list, vectors: list,
+                        metadata=None, record_ids=None, batch_size=50):
+        if metadata is None:
+            metadata = [None] * len(texts)
+
+        if record_ids is None:
+            record_ids = [str(uuid4()) for _ in range(len(texts))]
+        else:
+            record_ids = [rid if rid is not None else str(uuid4()) for rid in record_ids]
+
+        for i in range(0, len(texts), batch_size):
+            batch_end = i + batch_size
+            batch_texts = texts[i:batch_end]
+            batch_vectors = vectors[i:batch_end]
+            batch_metadata = metadata[i:batch_end]
+            batch_ids = record_ids[i:batch_end]
+
+            batch_points = [
+                models.PointStruct(
+                    id=batch_ids[j],
+                    vector=batch_vectors[j],
+                    payload={"text": batch_texts[j], "metadata": batch_metadata[j]} if batch_metadata[j] else {"text": batch_texts[j]}
+                )
+                for j in range(len(batch_texts))
+            ]
             try:
-                self.client.upload_records(
+                self.client.upsert(
                     collection_name=collection_name,
-                    records=[
-                        models.Record(
-                            id=record_id,
-                            vector=vector,
-                            payload={"text": text, "metadata": metadata} if metadata else {"text": text}
-                        )
-                    ]
+                    points=batch_points
                 )
             except Exception as e:
-                     self.logger.error(f"Cannot insert new record {e}")
-                     return False
-            self.logger.info(f"Data inserted into collection '{collection_name}' successfully.")
-            return True
-    def insert_many_data(self, collection_name: str,
-                          texts: list, vectors: list,
-                            metadatas=None,
-                              record_ids=None,
-                              batch_size=50,):
-            if metadatas is None:
-                metadatas = [None] * len(texts)
+                self.logger.error(f"Error inserting batch starting at index {i}: {e}")
+                return False
 
-            if record_ids is None:
-                record_ids = [None] * len(texts)
-
-            for i in range(0, len(texts), batch_size):
-                batch_end = i + batch_size
-                batch_texts = texts[i:batch_end]
-                batch_vectors = vectors[i:batch_end]
-                batch_metadatas = metadatas[i:batch_end]
-                batch_records = [
-                    models.Record(
-                        id=record_ids[j],
-                        vector=batch_vectors[j],
-                        payload={"text": batch_texts[j], "metadata": batch_metadatas[j]} if batch_metadatas[j] else {"text": batch_texts[j]}
-                    )
-                    for j in range(len(batch_texts))
-                ]
-                try:
-                    self.client.upload_records(
-                        collection_name=collection_name,
-                        records=batch_records,
-                    )
-                except Exception as e:
-                     self.logger.error(f"Error inserting batch starting at index {i}: {e}")
-                     return False
-                     
-            self.logger.info(f"{len(texts)} records inserted into collection '{collection_name}' successfully.")
-            return True
+        self.logger.info(f"{len(texts)} records inserted into collection '{collection_name}' successfully.")
+        return True
     def search_by_vector(self, collection_name: str, vector: list, top_k: int = 5, include_metadata: bool = False):
-            return self.client.search(
-                collection_name=collection_name,
-                query_vector=vector,
-                limit=top_k,
-                with_payload=include_metadata
-            )
+        results = self.client.query_points(
+        collection_name=collection_name,
+        query=vector,
+        limit=top_k,
+        with_payload=True
+        )
+        return [r.model_dump() for r in results.points]
