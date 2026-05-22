@@ -1,3 +1,5 @@
+import json
+
 from .BaseController import BaseController
 from models.db_schemes.project import Project
 from models.db_schemes.data_chunk import DataChunk
@@ -52,3 +54,14 @@ class NLPController(BaseController):
             vectors = vectors
         )
         return True
+    def search_vector_db_collection(self, project: Project, text: str, top_k: int = 5):
+        collection_name = self.create_collection_name(project_id=project.project_id)
+        text_vector = self.embedding_client.embed_text(text=text, document_type=Document_Type.QUERY.value)
+        search_results = self.vectordb_client.search_by_vector(
+            collection_name=collection_name,
+            vector=text_vector,
+            top_k=top_k
+        )
+        if not search_results:
+            return None
+        return json.loads(json.dumps(search_results, default=lambda x: x.__dict__))
