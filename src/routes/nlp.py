@@ -111,6 +111,7 @@ async def search_index(request: Request, project_id: str, search_request: Search
         vectordb_client=request.app.vectordb_client,
         generation_client=request.app.generation_client,
         embedding_client=request.app.embedding_client,
+        template_parser = request.app.template_parser,
     )
 
     results = nlp_controller.search_vector_db_collection(
@@ -124,12 +125,49 @@ async def search_index(request: Request, project_id: str, search_request: Search
             "signal": ResponseSignal.VECTOR_COLLECTION_RETRIEVE_SUCCESS.value,
             "results": [
                 {
-                    "id": str(r["id"]),
+                    # "id": str(r["id"]),
                     "score": r["score"],
                     "text": r["payload"].get("text") if r["payload"] else None,
-                    "metadata": r["payload"].get("metadata") if r["payload"] else None,
+                    # "metadata": r["payload"].get("metadata") if r["payload"] else None,
                 }
                 for r in results
             ]
+        }
+    )
+
+@nlp_router.get("/index/answer/{project_id}")
+async def answer_query(request: Request, project_id: str, search_request: SearchRequest):
+    project_model = await ProjectModel.create_instance(
+        db_client=request.app.db_client,
+        
+    )
+    project = await project_model.get_project_or_create_one(project_id = project_id)
+
+    nlp_controller = NLPController(
+        vectordb_client=request.app.vectordb_client,
+        generation_client=request.app.generation_client,
+        embedding_client=request.app.embedding_client,
+        template_parser = request.app.template_parser,
+    )
+
+    answer, full_prompt, chat_history = nlp_controller.answer_query_with_generation(
+        project=project,
+        query=search_request.text,
+        top_k=search_request.top_k
+    )
+
+    if not answer:
+        return JSONResponse(
+            content={
+                "signal": ResponseSignal.ANSWER_GENERATION_FAILED.value,
+                
+            }
+        )
+    return JSONResponse(
+        content={
+            "signal": ResponseSignal.ANSWER_GENERATION_SUCCESS.value,
+            "answer": answer,
+            "full_prompt": full_prompt,
+            "chat_history": [str(msg) for msg in chat_history]  # or .dict() if Pydantic models
         }
     )

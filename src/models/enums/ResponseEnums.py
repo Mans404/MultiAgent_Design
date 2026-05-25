@@ -15,3 +15,5 @@ class ResponseSignal(Enum):
     INSERT_INTO_VECTORDB_SUCCESS = "insert_into_vectordb_success"
     VECTOR_COLLECTION_RETRIEVE_SUCCESS = "vector_collection_retrieve_success"
     VECTOR_COLLECTION_RETRIEVE_FAILED = "vector_collection_retrieve_failed"
+    ANSWER_GENERATION_FAILED = "answer_generation_failed"
+    ANSWER_GENERATION_SUCCESS = "answer_generation_success"

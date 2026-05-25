@@ -9,4 +9,4 @@ class PushRequest(BaseModel):
 
 class SearchRequest(BaseModel):
     text: str
-    top_k: Optional[int] = 5
+    top_k: Optional[int] = 2

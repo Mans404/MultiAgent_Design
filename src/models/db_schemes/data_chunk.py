@@ -24,3 +24,7 @@ class DataChunk(BaseModel):
                 "unique": False
             }
         ]
+    
+class RetrievedDocument(BaseModel):
+    chunk_text: str
+    chunk_score: int
