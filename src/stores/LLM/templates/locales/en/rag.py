@@ -14,7 +14,9 @@ retrieved_doc_prompt = Template("\n".join([
 ]))
 
 """ Footer prompt for RAG """
-footer_template = "\n".join([
+footer_template = Template("\n".join([  
     "Based on the above retrieved documents, please answer the following question:",
-    "Answer:"
-])
+    "## Question:",
+    "${query}",                         
+    "## Answer:"
+]))

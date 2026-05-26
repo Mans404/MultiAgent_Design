@@ -89,7 +89,7 @@ class NLPController(BaseController):
 
         # step2: load and validate required templates
         system_prompt = self.template_parser.get("rag", "system_prompt")
-        footer_prompt = self.template_parser.get("rag", "footer_template")
+        footer_prompt = self.template_parser.get("rag", "footer_template", {"query": query})
 
         if not system_prompt or not footer_prompt:
             raise ValueError("Missing required RAG templates: check 'system_prompt' and 'footer_template' keys")
@@ -118,7 +118,7 @@ class NLPController(BaseController):
         ] + chat_history
 
         # step5: assemble full prompt
-        full_prompt = "\n".join(documents_prompts) + "\n" + footer_prompt + "\n" + query
+        full_prompt = "\n".join(documents_prompts) + "\n" + footer_prompt
 
         # step6: generate answer
         answer = self.generation_client.generate_text(

@@ -139,7 +139,7 @@ async def search_index(request: Request, project_id: str, search_request: Search
         }
     )
 
-@nlp_router.get("/index/answer/{project_id}")
+@nlp_router.post("/index/answer/{project_id}")
 async def answer_query(request: Request, project_id: str, search_request: SearchRequest):
     project_model = await ProjectModel.create_instance(
         db_client=request.app.db_client,
