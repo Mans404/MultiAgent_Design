@@ -17,21 +17,21 @@ It uploads documents, splits them into chunks, creates embeddings, stores vector
 
 ```mermaid
 flowchart TD
-		A[User uploads a file] --> B[POST /api/v1/data/upload/{project_id}]
-		B --> C[Save file on disk]
-		C --> D[Save file metadata in MongoDB]
-		D --> E[POST /api/v1/data/process/{project_id}]
-		E --> F[Load TXT or PDF content]
-		F --> G[Split document into chunks]
-		G --> H[Save chunks in MongoDB]
-		H --> I[POST /api/v1/nlp/index/push/{project_id}]
-		I --> J[Create embeddings for each chunk]
-		J --> K[Store vectors in Qdrant]
-		L[User asks a question] --> M[POST /api/v1/nlp/index/answer/{project_id}]
-		M --> N[Embed the query]
-		N --> O[Search top-k similar chunks in Qdrant]
-		O --> P[Build prompt with retrieved context]
-		P --> Q[LLM generates the answer]
+    A[User uploads a file] --> B[POST /api/v1/data/upload/[project_id]]
+    B --> C[Save file on disk]
+    C --> D[Save file metadata in MongoDB]
+    D --> E[POST /api/v1/data/process/[project_id]]
+    E --> F[Load TXT or PDF content]
+    F --> G[Split document into chunks]
+    G --> H[Save chunks in MongoDB]
+    H --> I[POST /api/v1/nlp/index/push/[project_id]]
+    I --> J[Create embeddings for each chunk]
+    J --> K[Store vectors in Qdrant]
+    L[User asks a question] --> M[POST /api/v1/nlp/index/answer/[project_id]]
+    M --> N[Embed the query]
+    N --> O[Search top-k similar chunks in Qdrant]
+    O --> P[Build prompt with retrieved context]
+    P --> Q[LLM generates the answer]
 ```
 
 ## How the project works
