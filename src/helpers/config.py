@@ -1,7 +1,7 @@
 import os
 
 from pydantic_settings import BaseSettings
-
+from typing import List
 class Settings(BaseSettings):
 
     APP_NAME: str
@@ -12,8 +12,7 @@ class Settings(BaseSettings):
     FILE_MAX_SIZE: int
     FILE_DEFAULT_CHUNK_SIZE: int
 
-    MONGODB_URL: str
-    MONGODB_DATABASE: str
+
 
     GENERATION_BACKEND: str
     EMBEDDING_BACKEND: str
@@ -29,11 +28,20 @@ class Settings(BaseSettings):
     INPUT_DEFAULT_MAX_CHARACTERS: int
     GENERATION_DEFAULT_MAX_TOKENS: int
     GENERATION_DEFAULT_TEMPERATURE: float
+    VECTOR_DB_BACKEND_LITERALS: List[str] = ["QDRANT", "PGVECTOR"]
     VECTOR_DB_BACKEND: str
     VECTOR_DB_PATH: str
     VECTOR_DB_DISTANCE_METHOD: str = None
     DEFAULT_LANG: str = "en"
     PRIMARY_LANG: str = "en"
+
+    
+    POSTGRES_USERNAME: str
+    POSTGRES_PASSWORD : str
+    POSTGRES_HOST: str
+    POSTGRES_PORT: int
+    POSTGRES_MAIN_DB: str
+    
 
     
     class Config:
