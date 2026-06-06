@@ -1,7 +1,7 @@
 import json
 from .BaseController import BaseController
-from models.db_schemes.project import Project
-from models.db_schemes.data_chunk import DataChunk
+from models.db_schemes import Project
+from models.db_schemes import DataChunk
 from stores.LLM.LLM_Enums import Document_Type
 from typing import List
 from logging import Logger
@@ -97,9 +97,13 @@ class NLPController(BaseController):
         # step3: build document prompts
         documents_prompts = []
         for idx, doc in enumerate(retrieved_docs):
+            chunk_text = doc["payload"]["text"]
+            if hasattr(self.generation_client, "process_text"):
+                chunk_text = self.generation_client.process_text(chunk_text)
+
             prompt = self.template_parser.get("rag", "retrieved_doc_prompt", {
                 "doc_num": idx + 1,
-                "chunk_text": doc["payload"]["text"],
+                "chunk_text": chunk_text,
             })
             if prompt is None:
                 return None, None, chat_history
