@@ -90,5 +90,5 @@ class OPENAI_Provider(LLM_Interface):
     def construct_prompt(self, prompt: str, role: str) -> dict:
         return {
             "role" : role,
-            "content" : self.process_text(prompt)
+            "content" : prompt,
         }
