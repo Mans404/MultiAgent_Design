@@ -142,11 +142,22 @@ async def search_index(request: Request, project_id: int, search_request: Search
         template_parser=request.app.template_parser,
     )
 
-    results = await nlp_controller.search_vector_db_collection(
-        project=project,
-        text=search_request.text,
-        top_k=search_request.top_k,
-    )
+    try:
+        results = await nlp_controller.search_vector_db_collection(
+            project=project,
+            text=search_request.text,
+            top_k=search_request.top_k,
+        )
+    except ValueError as e:
+        # Collection not found or other collection-related errors
+        return JSONResponse(
+            status_code=status.HTTP_404_NOT_FOUND,
+            content={
+                "signal": ResponseSignal.NO_RESULTS_FOUND.value,
+                "results": [],
+                "error": str(e),
+            }
+        )
 
     # FIX: results can be None when:
     #   (a) the collection is empty
