@@ -1,12 +1,10 @@
-from select import select
-
 from .BaseDataModel import BaseDataModel
 from .db_schemes import DataChunk
 from .enums.DataBaseEnum import DataBaseEnum
 from bson.objectid import ObjectId
-from pymongo import InsertOne
 from sqlalchemy.future import select
 from sqlalchemy import func, delete
+
 
 class ChunkModel(BaseDataModel):
 
@@ -29,7 +27,6 @@ class ChunkModel(BaseDataModel):
 
     async def get_chunk(self, chunk_id: str):
         async with self.db_client() as session:
-            # ✅ Fixed: execute the query, then call scalar_one_or_none on the result
             query = select(DataChunk).where(DataChunk._id == ObjectId(chunk_id))
             result = await session.execute(query)
             return result.scalar_one_or_none()
@@ -48,11 +45,9 @@ class ChunkModel(BaseDataModel):
             async with session.begin():
                 query = delete(DataChunk).where(DataChunk.chunk_project_id == project_id)
                 result = await session.execute(query)
-            # ✅ Fixed: commit is handled by session.begin() context manager, removed duplicate
         return result.rowcount
 
     async def get_project_chunks(self, project_id: ObjectId, page_no: int = 1, page_size: int = 50):
-        # ✅ Fixed: replaced MongoDB cursor pattern with SQLAlchemy
         async with self.db_client() as session:
             offset = (page_no - 1) * page_size
             query = (
@@ -63,3 +58,22 @@ class ChunkModel(BaseDataModel):
             )
             result = await session.execute(query)
             return result.scalars().all()
+
+  
+    async def get_total_chunks_count(self, project_id: ObjectId):
+        async with self.db_client() as session:
+            query = (
+                select(func.count(DataChunk.chunk_id))
+                .where(DataChunk.chunk_project_id == project_id)
+            )
+            result = await session.execute(query)
+        return result.scalar_one()
+
+
+    async def update_chunks_vectors(self, chunks: list, vectors: list):
+        async with self.db_client() as session:
+            async with session.begin():
+                for chunk, vector in zip(chunks, vectors):
+                    db_chunk = await session.get(DataChunk, chunk.chunk_id)
+                    if db_chunk:
+                        db_chunk.chunk_vector = vector
