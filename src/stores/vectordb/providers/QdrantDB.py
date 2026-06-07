@@ -168,12 +168,18 @@ class QdrantDB(VectorDB_Interface):
 
     async def search_by_vector(self, collection_name: str, vector: list, top_k: int = 5,
                                include_metadata: bool = False) -> list:
-        results = await self.client.query_points(
-            collection_name=collection_name,
-            query=vector,
-            limit=top_k,
-            with_payload=True,
-        )
+        try:
+            results = await self.client.query_points(
+                collection_name=collection_name,
+                query=vector,
+                limit=top_k,
+                with_payload=True,
+            )
+        except ValueError as e:
+            if "not found" in str(e).lower():
+                self.logger.error(f"Collection '{collection_name}' does not exist. Index the project first.")
+                raise ValueError(f"Collection '{collection_name}' not found. Please index the project before searching.")
+            raise
 
         # Returns a consistent { score, payload: { text, metadata } } structure
         # so that NLPController can always access doc["payload"]["text"] safely
