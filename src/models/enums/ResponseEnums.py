@@ -17,3 +17,4 @@ class ResponseSignal(Enum):
     VECTOR_COLLECTION_RETRIEVE_FAILED = "vector_collection_retrieve_failed"
     ANSWER_GENERATION_FAILED = "answer_generation_failed"
     ANSWER_GENERATION_SUCCESS = "answer_generation_success"
+    NO_RESULTS_FOUND = "no_results_found"
