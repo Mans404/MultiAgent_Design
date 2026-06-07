@@ -22,7 +22,3 @@ class LLM_Interface(ABC):
     @abstractmethod
     def construct_prompt(self, prompt: str, role: str) -> str:
         pass
-
-
-    
-    

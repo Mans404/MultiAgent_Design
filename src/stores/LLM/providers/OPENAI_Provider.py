@@ -35,7 +35,7 @@ class OPENAI_Provider(LLM_Interface):
     # I have a question for this code.
     def process_text(self, text: str) -> str:
         return text[0:self.default_input_max_tokens].strip()
-    def generate_text(self, prompt: str, max_out_tokens: int = None,
+    async def generate_text(self, prompt: str, max_out_tokens: int = None,
                         chat_history: list=[],
                         temperature: float = None,
                          ) -> str:
@@ -73,16 +73,17 @@ class OPENAI_Provider(LLM_Interface):
             self.logger.error("OpenAI client was not set")
             return None
 
-        if isinstance(text, list):
-            text = [text]
-        
         if not self.embedding_model_name:
             self.logger.error("Embedding model for OpenAI was not set")
             return None
-        
+
+        # Normalize: wrap a single string into a list
+        if isinstance(text, str):
+            text = [text]
+
         response = self.client.embeddings.create(
-            model = self.embedding_model_name,
-            input = text
+            model=self.embedding_model_name,
+            input=text
         )
 
         if not response or len(response.data) == 0:

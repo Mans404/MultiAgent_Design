@@ -8,7 +8,7 @@ class Cohere_Provider(LLM_Interface):
                     
                     default_input_max_tokens: int = 1000,
                     default_output_max_tokens: int = 200,
-                    default_temperature: float = 0.7,
+                    default_temperature: float = 0.4,
                     model_name: str = None):
         
         self.api_key = api_key
