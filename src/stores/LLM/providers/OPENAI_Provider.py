@@ -2,6 +2,7 @@ from ..LLM_Interface import LLM_Interface
 from ..LLM_Enums import LLM_Enums, OpenAI_Enums
 from openai import OpenAI
 import logging
+from typing import Union, List
 class OPENAI_Provider(LLM_Interface):
 
     def __init__(self, api_key: str,
@@ -67,10 +68,13 @@ class OPENAI_Provider(LLM_Interface):
         return response.choices[0].message.content
 
     
-    def embed_text(self, text:str, document_type: str = None) -> str:
+    def embed_text(self, text: Union[str, List[str]], document_type: str = None) -> List[float]:
         if not self.client:
             self.logger.error("OpenAI client was not set")
             return None
+
+        if isinstance(text, list):
+            text = [text]
         
         if not self.embedding_model_name:
             self.logger.error("Embedding model for OpenAI was not set")
@@ -85,7 +89,7 @@ class OPENAI_Provider(LLM_Interface):
             self.logger.error("Error while embedding OpenAI model")
             return None
         
-        return response.data[0].embedding
+        return [embedding for embedding in response.data[0].embedding]
     
     def construct_prompt(self, prompt: str, role: str) -> dict:
         return {
