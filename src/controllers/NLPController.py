@@ -103,6 +103,11 @@ class NLPController(BaseController):
         if not search_results:
             return None
 
+        self.logger.info(
+            f"Raw search returned {len(search_results)} results. "
+            f"Top scores: {[f'{r['score']:.4f}' for r in search_results]}"
+        )
+
         # FIX: filter out low-confidence results.
         # Without a threshold, the top-K results are always returned regardless
         # of how poorly they match the query — leading to unrelated chunks being
@@ -124,7 +129,32 @@ class NLPController(BaseController):
             )
             return None
 
-        return filtered_results
+        # FIX: Deduplicate results by text content.
+        # If the same chunk text appears multiple times in the results
+        # (due to duplicate indexing or other issues), keep only the one
+        # with the highest score and discard the others.
+        seen_texts = {}
+        deduplicated_results = []
+        duplicates_found = 0
+        for result in filtered_results:
+            text = result["payload"]["text"]
+            if text not in seen_texts:
+                seen_texts[text] = len(deduplicated_results)
+                deduplicated_results.append(result)
+            else:
+                # Replace with higher score if this one is better
+                existing_idx = seen_texts[text]
+                if result["score"] > deduplicated_results[existing_idx]["score"]:
+                    deduplicated_results[existing_idx] = result
+                duplicates_found += 1
+
+        if duplicates_found > 0:
+            self.logger.warning(
+                f"Found and removed {duplicates_found} duplicate chunk(s) from search results. "
+                f"This may indicate duplicate chunks in the collection."
+            )
+
+        return deduplicated_results
 
     # -------------------------------------------------------------------------
     # RAG pipeline
