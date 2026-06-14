@@ -102,10 +102,10 @@ class NLPController(BaseController):
 
         if not search_results:
             return None
-
+        top_scores = [f"{r['score']:.4f}" for r in search_results]
         self.logger.info(
             f"Raw search returned {len(search_results)} results. "
-            f"Top scores: {[f'{r['score']:.4f}' for r in search_results]}"
+            f"Top scores: {top_scores}"
         )
 
         # FIX: filter out low-confidence results.
