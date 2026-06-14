@@ -1,14 +1,18 @@
 from fastapi import FastAPI
 from routes import base, data, nlp
-from motor.motor_asyncio import AsyncIOMotorClient
 from helpers.config import get_settings
 from stores import LLM_Provider_Factory
 from stores.vectordb.VectorDB_Provider_Factory import VectorDB_Provider_Factory
 from stores.LLM.templates.template_parser import TemplateParser
 from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession
 from sqlalchemy.orm import sessionmaker
+
+# Import Metrics setup
+from utils.metrics import setup_metrics
+
 app = FastAPI()
 
+setup_metrics(app)
 
 async def startup_span():
     settings = get_settings()
